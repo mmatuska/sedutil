@@ -19,8 +19,10 @@ along with sedutil.  If not, see <http://www.gnu.org/licenses/>.
  * C:E********************************************************************** */
 #include "os.h"
 #include <sys/ioctl.h>
-#include <linux/sed-opal.h>
 #include "DtaDevLinuxDrive.h"
+#ifndef PBA_BUILD
+#include <linux/sed-opal.h>
+#endif
 
 using namespace std;
 
@@ -28,6 +30,10 @@ uint8_t DtaDevLinuxDrive::prepareForS3Sleep(uint8_t lockingrange, const vector<u
 {
     LOG(D1) << "Entering DtaDevLinuxDrive::prepareForS3Sleep";
 
+#ifdef PBA_BUILD
+    LOG(E) << "prepareForS3Sleep not supported in PBA build";
+    return -1;
+#else
     opal_lock_unlock opal_ioctl_data={};
     opal_ioctl_data.l_state = OPAL_RW;
     opal_ioctl_data.session.who = OPAL_ADMIN1;
@@ -43,4 +49,5 @@ uint8_t DtaDevLinuxDrive::prepareForS3Sleep(uint8_t lockingrange, const vector<u
     if (err < 0)
         return errno;
     return 0;
+#endif
 }
